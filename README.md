@@ -100,14 +100,14 @@ Generative AI was used as an aid during the preparation of this
 repository, specifically for cleaning up and restructuring code,
 and finding documentation. The model used was Anthropic Claude Opus 4.7.
 
-The AI was used as an editor and explainer, not as an independent
-author. No proprietary information, no part of the confidential
+No proprietary information, no part of the confidential
 geometry, no internal industry communication, and no thesis text was
 shared with the model. The role of the AI was limited to:
 
 - Renaming variables and cleaning up code that had accumulated
   iteration artefacts during development.
 - Reseaching and finding the documentation and the repository.
+- Refining code and sorting data 
 
 All output produced with AI assistance was reviewed by the thesis author,
 compiled, executed, and verified against reference
