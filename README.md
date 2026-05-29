@@ -1,5 +1,5 @@
 # Master-s-Thesis-code
-# Master's Thesis Code — Lattice Boltzmann CFD Around a Bottom-Fixed Structure
+# Master's Thesis Code - Lattice Boltzmann CFD Around a Bottom-Fixed Structure
 
 This repository contains the GPU lattice Boltzmann (LBM) code developed
 for a master's thesis on wind flow simulation around offshore
@@ -107,7 +107,8 @@ shared with the model. The role of the AI was limited to:
 - Renaming variables and cleaning up code that had accumulated
   iteration artefacts during development.
 - Reseaching and finding the documentation and the repository.
-- Refining code and sorting data 
+- Refining code and sorting data
+- Structuring README based on input
 
 All output produced with AI assistance was reviewed by the thesis author,
 compiled, executed, and verified against reference
