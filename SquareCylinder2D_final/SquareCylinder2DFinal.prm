@@ -1,0 +1,97 @@
+//======================================================================================================================
+//  SquareCylinder2D_final — quasi-2D validation case (D4 domain, 16 cpL)
+//
+//  Domain:        48L x 32L x 1 cell  (D4, Lz = single cell, periodic z)
+//  Resolution:    16 cells per characteristic length L
+//  Grid:          768 x 512 x 1 cells in one block (single-block, no AMR)
+//  Reynolds:      1000
+//  Mach (lattice):≈ 0.087  (u_lattice = 0.05)
+//  Turbulence:    Implicit LES via K17 (no explicit SGS model)
+//  Square at:     (16L, 16L)  i.e. one third from inlet, centred in y
+//
+//  Configured to match WaterLily D4 reference run as closely as possible:
+//  uniform Cartesian grid, FreeSlip top/bottom, periodic spanwise, NoSlip on square.
+//======================================================================================================================
+
+Parameters
+{
+    reynoldsNumber       1000;
+    diameterSquare       1.0;        // L (physical reference length)
+    squareXPosition      16.0;       // 1/3 of domain length from inlet, in units of L
+    referenceVelocity    1.0;        // U_inf [physical]
+    latticeVelocity      0.05;       // u_lattice (gives Ma ≈ 0.087)
+    initialiseWithInletVelocity true;
+    coarseMeshSize       0.0625;     // dx = L/16  →  16 cells per L
+    timesteps            300000;     // ~300 advective time units at 16 cpL, Ma=0.087
+    processMemoryLimit   2048;       // MiB
+    innerOuterSplit      <1, 1, 1>;
+    gpuEnabledMPI        false;      // single-GPU run
+}
+
+DomainSetup
+{
+    // Single block holding the entire mesh: 768 x 512 cells in plane, 1 cell deep
+    cellsPerBlock        < 768, 512, 1 >;
+    // Domain in physical units (multiplied by L): 48L x 32L x dx
+    domainSize           < 48, 32, 0.0625 >;
+    // Periodic in z (quasi-2D), Dirichlet/Neumann in x and y (set via boundaries below)
+    periodic             < false, false, true >;
+    refinementLevels     0;          // uniform grid, no AMR
+    numberProcesses      1;
+    blockForestFilestem  squareCylinder2DBlockForest;
+}
+
+Boundaries
+{
+    square      Obstacle;       // NoSlip via QuadraticBounceBack (from FlowAroundCube codegen)
+    inflow      UBB;            // uniform inlet velocity = latticeVelocity along x
+    outflow     Outflow;        // ExtrapolationOutflow (non-reflective)
+    walls       FreeSlip;       // FreeSlip on y_min and y_max
+}
+
+SpongeLayer
+{
+    deactivateSpongeLayer true;     // not needed for short D4 domain
+    targetOmega           1.9;
+    spongeStart           44;
+}
+
+StabilityChecker
+{
+    checkFrequency 0;
+    streamOutput   false;
+    vtkOutput      false;
+}
+
+VTKWriter
+{
+    vtkWriteFrequency      2000;
+    vtkGhostLayers         0;
+    velocity               true;
+    density                true;
+    flag                   false;
+    omega                  false;
+    writeOnlySlice         false;   // full 2D plane (Nz=1, so already a single slice)
+    sliceThickness         1;
+    writeXZSlice           false;
+    amrFileFormat          false;   // uniform grid, no AMR
+    oneFilePerProcess      false;
+    samplingResolution     -1;
+    initialWriteCallsToSkip 0;
+}
+
+Logging
+{
+    logLevel                       info;
+    writeSetupForestAndReturn      false;
+    readSetupFromFile              false;
+    remainingTimeLoggerFrequency   60;
+}
+
+Evaluation
+{
+    evaluationCheckFrequency 200;
+    rampUpTime               20000;   // skip initial transient before averaging
+    logToStream              true;
+    logToFile                true;
+}
