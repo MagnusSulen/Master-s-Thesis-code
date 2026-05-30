@@ -96,7 +96,7 @@ bottom-fixed structures.
 
 ## AI assistance declaration
 
-Generative AI was used as an aid during the preparation of this
+Generative AI was used as an aid during the preparation of the codes and this
 repository, specifically for cleaning up and restructuring code,
 and finding documentation. The model used was Anthropic Claude Opus 4.7.
 
