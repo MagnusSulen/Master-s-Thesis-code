@@ -114,7 +114,7 @@ class CubeRefinementSelection
       {
          const AABB& aabb = block->getAABB();
 
-         { AABB zone_L2(real_c(8),real_c(8),real_c(8),real_c(16),real_c(12),real_c(12)); if(block->getLevel()<uint_c(2)&&zone_L2.intersects(aabb)) block->setMarker(true); }
+         { AABB zone_L2(real_c(12),real_c(12),real_c(12),real_c(22),real_c(20),real_c(20)); if(block->getLevel()<uint_c(2)&&zone_L2.intersects(aabb)) block->setMarker(true); }
 
       }
    }

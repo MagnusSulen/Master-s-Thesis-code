@@ -1,86 +1,94 @@
+//======================================================================================================================
+//  FlowAroundCube3D — three-dimensional cube benchmark
+//
+//  Domain:           48L x 32L x 32L  (matches 2D domain from upstream validation, extended to 3D)
+//  Resolution:       4 cpL on the base mesh (L0), 16 cpL on the finest mesh (L2)
+//  Refinement:       2 levels (L0, L1, L2)
+//  Reynolds:         1000
+//  Mach (lattice):   ~ 0.087  (u_lattice = 0.05)
+//  Turbulence:       Smagorinsky toggled via USE_SMAGORINSKY in FlowAroundCube.py
+//  Cube position:    centred laterally, 16L from inlet, on cube side length L = 1
+//======================================================================================================================
+
 Parameters
 {
-    reynoldsNumber 1000000;
-    diameterSphere 1.0;
-    sphereXPosition 12;
+    reynoldsNumber               1000;
+    diameterSphere               1.0;        // Cube side length L (parameter name kept for upstream compatibility)
+    sphereXPosition              16;         // 1/3 of streamwise domain length, in units of L
+    referenceVelocity            1.0;
+    latticeVelocity              0.05;       // gives Ma ~ 0.087
+    initialiseWithInletVelocity  true;
 
-    referenceVelocity 1.0;
-    latticeVelocity 0.05;
-    initialiseWithInletVelocity true;
+    coarseMeshSize               0.25;       // dx_C = L/4  -> 4 cells per L on L0
+    timesteps                    128000;
 
-    coarseMeshSize 0.0625;
-    timesteps 60001;
+    processMemoryLimit           2048;       // MiB
+    innerOuterSplit              <1, 1, 1>;
 
-    processMemoryLimit 512; // MiB
-    innerOuterSplit <1, 1, 1>;
-
-    // GPU related Parameters, only used if GPU is enabled
-    gpuEnabledMPI true;
+    gpuEnabledMPI                false;
 }
 
-//! [domainSetup]
 DomainSetup
 {
-    cellsPerBlock < 64, 64, 64 >;
-    domainSize    < 40, 20, 20 >;
-    periodic    < false, false, false >;
-    refinementLevels 5;
-    numberProcesses 1; // This is for load balancing, overwritten if more than one proc is used
-    blockForestFilestem flowAroundSphereBlockForest;
+    cellsPerBlock        < 16, 16, 16 >;
+    domainSize           < 48, 32, 32 >;
+    periodic             < false, false, false >;
+    refinementLevels     2;
+    numberProcesses      1;
+    blockForestFilestem  cubeBlockForest;
 }
-//! [domainSetup]
 
 Boundaries
 {
-    sphere Obstacle;
-    inflow UBB;
-    outflow FixedDensity;
-    walls FreeSlip;
+    sphere   Obstacle;        // QuadraticBounceBack (no-slip with sub-cell precision)
+    inflow   UBB;             // uniform velocity inlet
+    outflow  FixedDensity;    // change to "Outflow" for ExtrapolationOutflow on complex geometries
+    walls    FreeSlip;
 }
 
 SpongeLayer
 {
-    deactivateSpongeLayer false;
-    targetOmega 1.9;
-    spongeStart 36;
+    deactivateSpongeLayer true;
+    targetOmega           1.9;
+    spongeStart           44;
 }
 
 StabilityChecker
 {
     checkFrequency 0;
     streamOutput   false;
-    vtkOutput      true;
+    vtkOutput      false;
 }
 
 VTKWriter
 {
-    vtkWriteFrequency 5000;
-    vtkGhostLayers 0;
-    velocity true;
-    density true;
-    flag false;
-    omega false;
-    writeOnlySlice true;
-    sliceThickness 1;
-    writeXZSlice false;
-    amrFileFormat true;
-    oneFilePerProcess false;
-    samplingResolution -1;
+    vtkWriteFrequency      4000;
+    vtkGhostLayers         0;
+    velocity               true;
+    density                true;
+    flag                   false;
+    omega                  false;
+    writeOnlySlice         true;
+    sliceThickness         1;
+    writeXZSlice           false;
+    amrFileFormat          false;
+    oneFilePerProcess      false;
+    samplingResolution     -1;
     initialWriteCallsToSkip 0;
 }
 
 Logging
 {
-    logLevel info;  // info progress detail tracing
-    writeSetupForestAndReturn true; // When only one process is used the decomposition is writen and the program terminates
-    readSetupFromFile false;
-    remainingTimeLoggerFrequency 60; // in seconds
+    logLevel                       info;
+    writeSetupForestAndReturn      false;
+    readSetupFromFile              false;
+    remainingTimeLoggerFrequency   60;
 }
 
 Evaluation
 {
     evaluationCheckFrequency 500;
-    rampUpTime 0;
-    logToStream true;
-    logToFile true;
+    rampUpTime               20000;
+    logToStream              true;
+    logToFile                true;
 }
